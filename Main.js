@@ -7,6 +7,9 @@ window.onload = function(){
     this.layer = null;
     this.bomber = null;
     this.gridsize = 16;
+    this.bombMax = 1;
+    this.activeBomb = 0;
+    this.fireSize =  1;
   }
   Bomberman.prototype = {
 
@@ -47,24 +50,28 @@ window.onload = function(){
         },
 
         checkInput: function() {
+          var that = this;
+          this.spaceKey.onDown.add(function(){
+            this.placeBomb();
+          },this)
 
-          if(this.spaceKey.isDown) {
-            var bomb = this.add.sprite(this.bomber.body.x, this.bomber.body.y, 'bomb', 0);
-            bomb.scale.setTo(2);
-            bomb.animations.add('pulse', [0,1,2,3], 10, true);
-            bomb.animations.play('pulse');
-          }
+
 
           if(this.cursors.right.isDown) {
+
+            this.bomber.body.velocity.y = 0;
             this.bomber.body.velocity.x = 100;
             this.bomber.animations.play('right');
           } else if(this.cursors.left.isDown) {
+            this.bomber.body.velocity.y = 0;
             this.bomber.body.velocity.x = -100;
             this.bomber.animations.play('left');
           } else if(this.cursors.up.isDown) {
+            this.bomber.body.velocity.x = 0;
             this.bomber.body.velocity.y = -100;
             this.bomber.animations.play('up');
           } else if(this.cursors.down.isDown) {
+            this.bomber.body.velocity.x = 0;
             this.bomber.body.velocity.y = 100;
             this.bomber.animations.play('down');
           }
@@ -75,10 +82,32 @@ window.onload = function(){
           }
         },
 
+        placeBomb: function() {
+          if (this.activeBomb < this.bombMax) {
+            var bomb = this.add.sprite(this.bomber.body.x, this.bomber.body.y, 'bomb', 0);
+            bomb.animations.add('pulse', [1,2,3], 10, true);
+            bomb.animations.play('pulse');
+            bomb.scale.setTo(2);
+            this.activeBomb += 1;
+
+            setTimeout(this.explode, 3000, this, bomb);
+          }
+        },
+
+        explode: function(that, bomb) {
+
+          bomb.animations.stop()
+          bomb.animations.add('explode', [9, 17], 10, false);
+          bomb.animations.play('explode', 10, false, true);
+          that.activeBomb -= 1;
+
+        },
+
         update: function() {
 
           this.physics.arcade.collide(this.bomber, this.layer);
           this.checkInput();
+
         }
       };
       game.state.add('Game', Bomberman, true);

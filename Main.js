@@ -58,24 +58,20 @@ window.onload = function(){
 
 
           if(this.cursors.right.isDown) {
-
-            this.bomber.body.velocity.y = 0;
             this.bomber.body.velocity.x = 100;
             this.bomber.animations.play('right');
           } else if(this.cursors.left.isDown) {
-            this.bomber.body.velocity.y = 0;
             this.bomber.body.velocity.x = -100;
             this.bomber.animations.play('left');
           } else if(this.cursors.up.isDown) {
-            this.bomber.body.velocity.x = 0;
             this.bomber.body.velocity.y = -100;
             this.bomber.animations.play('up');
           } else if(this.cursors.down.isDown) {
-            this.bomber.body.velocity.x = 0;
             this.bomber.body.velocity.y = 100;
             this.bomber.animations.play('down');
           }
-          else {
+          else if(this.bomber.x%32 === 0 && this.bomber.y%32 === 0){
+
             this.bomber.body.velocity.x = 0;
             this.bomber.body.velocity.y = 0;
             this.bomber.animations.stop();
@@ -84,7 +80,7 @@ window.onload = function(){
 
         placeBomb: function() {
           if (this.activeBomb < this.bombMax) {
-            var bomb = this.add.sprite(this.bomber.body.x, this.bomber.body.y, 'bomb', 0);
+            var bomb = this.add.sprite(Phaser.Math.snapTo(this.bomber.body.x, 32), Phaser.Math.snapTo(this.bomber.body.y, 32), 'bomb', 0);
             bomb.animations.add('pulse', [1,2,3], 10, true);
             bomb.animations.play('pulse');
             bomb.scale.setTo(2);
@@ -97,8 +93,32 @@ window.onload = function(){
         explode: function(that, bomb) {
 
           bomb.animations.stop()
-          bomb.animations.add('explode', [9, 17], 10, false);
-          bomb.animations.play('explode', 10, false, true);
+          bomb.animations.add('explode', [9, 17, 25, 33, 41], 10, false);
+
+
+              var right = bomb.addChild(that.make.sprite(that.gridsize-1, 0, 'bomb', 15));
+              var left = bomb.addChild(that.make.sprite(1, 0,'bomb', 15));
+              var up = bomb.addChild(that.make.sprite(0, -that.gridsize +1, 'bomb', 15));
+              var down = bomb.addChild(that.make.sprite(0, 2*that.gridsize - 1, 'bomb', 15));
+              down.anchor.setTo(0,0);
+              left.anchor.setTo(0, 0);
+              down.scale.y = -1;
+              left.scale.x = -1;
+              var fire = this.fireSize;
+              while(fire > 0) {
+
+              }
+              right.animations.add('explode_right', [10,18,26,34,42], 15, false);
+              left.animations.add('explode_left', [10,18,26,34,42], 15, false);
+              up.animations.add('explode_up', [8,16,24,32,40], 15, false);
+              down.animations.add('explode_down', [8,16,24,32,40], 15, false);
+              right.animations.play('explode_right', 10, false);
+              left.animations.play('explode_left', 10, false);
+              up.animations.play('explode_up', 10, false);
+              down.animations.play('explode_down', 10, false);
+          bomb.animations.play('explode', 15, false, true);
+
+
           that.activeBomb -= 1;
 
         },
@@ -107,7 +127,6 @@ window.onload = function(){
 
           this.physics.arcade.collide(this.bomber, this.layer);
           this.checkInput();
-
         }
       };
       game.state.add('Game', Bomberman, true);

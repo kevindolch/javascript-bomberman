@@ -7,9 +7,9 @@ window.onload = function(){
     this.layer = null;
     this.bomber = null;
     this.gridsize = 16;
-    this.bombMax = 1;
+    this.bombMax = 3;
     this.activeBomb = 0;
-    this.fireSize =  1;
+    this.fireSize =  4;
   }
   Bomberman.prototype = {
 
@@ -51,9 +51,7 @@ window.onload = function(){
 
         checkInput: function() {
           var that = this;
-          this.spaceKey.onDown.add(function(){
-            this.placeBomb();
-          },this)
+          this.spaceKey.onDown.add( this.placeBomb ,this)
 
 
 
@@ -79,6 +77,7 @@ window.onload = function(){
         },
 
         placeBomb: function() {
+
           if (this.activeBomb < this.bombMax) {
             var bomb = this.add.sprite(Phaser.Math.snapTo(this.bomber.body.x, 32), Phaser.Math.snapTo(this.bomber.body.y, 32), 'bomb', 0);
             bomb.animations.add('pulse', [1,2,3], 10, true);
@@ -91,33 +90,93 @@ window.onload = function(){
         },
 
         explode: function(that, bomb) {
-
+          var fire = that.fireSize;
           bomb.animations.stop()
           bomb.animations.add('explode', [9, 17, 25, 33, 41], 10, false);
-
-
-              var right = bomb.addChild(that.make.sprite(that.gridsize-1, 0, 'bomb', 15));
-              var left = bomb.addChild(that.make.sprite(1, 0,'bomb', 15));
-              var up = bomb.addChild(that.make.sprite(0, -that.gridsize +1, 'bomb', 15));
-              var down = bomb.addChild(that.make.sprite(0, 2*that.gridsize - 1, 'bomb', 15));
+          if (fire === 0) {
+            var right = bomb.addChild(that.make.sprite(that.gridsize-1, 0, 'bomb', 15));
+            var left = bomb.addChild(that.make.sprite(1, 0,'bomb', 15));
+            var up = bomb.addChild(that.make.sprite(0, -that.gridsize +1, 'bomb', 15));
+            var down = bomb.addChild(that.make.sprite(0, 2*that.gridsize - 1, 'bomb', 15));
+            down.anchor.setTo(0,0);
+            left.anchor.setTo(0, 0);
+            down.scale.y = -1;
+            left.scale.x = -1;
+            right.animations.add('explode_right', [10,18,26,34,42], 15, false);
+            left.animations.add('explode_left', [10,18,26,34,42], 15, false);
+            up.animations.add('explode_up', [8,16,24,32,40], 15, false);
+            down.animations.add('explode_down', [8,16,24,32,40], 15, false);
+            right.animations.play('explode_right', 10, false);
+            left.animations.play('explode_left', 10, false);
+            up.animations.play('explode_up', 10, false);
+            down.animations.play('explode_down', 10, false);
+            bomb.animations.play('explode', 15, false, true);
+          }
+          else{
+            var right = bomb.addChild(that.make.sprite(that.gridsize-1, 0, 'bomb', 15));
+            var left = bomb.addChild(that.make.sprite(1, 0,'bomb', 15));
+            var up = bomb.addChild(that.make.sprite(0, -that.gridsize +1, 'bomb', 15));
+            var down = bomb.addChild(that.make.sprite(0, 2*that.gridsize - 1, 'bomb', 15));
+            down.anchor.setTo(0,0);
+            left.anchor.setTo(0, 0);
+            down.scale.y = -1;
+            left.scale.x = -1;
+            right.animations.add('explode_right', [12,20,28,36,44], 15, false);
+            left.animations.add('explode_left', [12,20,28,36,44], 15, false);
+            up.animations.add('explode_up', [11,19,27,35,43], 15, false);
+            down.animations.add('explode_down', [11,19,27,35,43], 15, false);
+            right.animations.play('explode_right', 10, false);
+            left.animations.play('explode_left', 10, false);
+            up.animations.play('explode_up', 10, false);
+            down.animations.play('explode_down', 10, false);
+            bomb.animations.play('explode', 15, false, true);
+            fire -= 1;
+            var pos = 2;
+            var leftPos = 1;
+            var downPos = 3;
+            var offset = 2;
+            while(fire > 0) {
+              right = bomb.addChild(that.make.sprite((pos * that.gridsize)-offset, 0, 'bomb', 15));
+              left = bomb.addChild(that.make.sprite((leftPos * -that.gridsize)+offset, 0,'bomb', 15));
+              up = bomb.addChild(that.make.sprite(0, (pos * -that.gridsize) +offset, 'bomb', 15));
+              down = bomb.addChild(that.make.sprite(0, (downPos * that.gridsize) - offset, 'bomb', 15));
               down.anchor.setTo(0,0);
               left.anchor.setTo(0, 0);
               down.scale.y = -1;
               left.scale.x = -1;
-              var fire = this.fireSize;
-              while(fire > 0) {
-
-              }
-              right.animations.add('explode_right', [10,18,26,34,42], 15, false);
-              left.animations.add('explode_left', [10,18,26,34,42], 15, false);
-              up.animations.add('explode_up', [8,16,24,32,40], 15, false);
-              down.animations.add('explode_down', [8,16,24,32,40], 15, false);
+              right.animations.add('explode_right', [12,20,28,36,44], 15, false);
+              left.animations.add('explode_left', [12,20,28,36,44], 15, false);
+              up.animations.add('explode_up', [11,19,27,35,43], 15, false);
+              down.animations.add('explode_down', [11,19,27,35,43], 15, false);
               right.animations.play('explode_right', 10, false);
               left.animations.play('explode_left', 10, false);
               up.animations.play('explode_up', 10, false);
               down.animations.play('explode_down', 10, false);
-          bomb.animations.play('explode', 15, false, true);
+              fire -= 1;
+              pos += 1;
+              leftPos += 1;
+              downPos +=1;
+              offset += 1;
+              }
 
+            right = bomb.addChild(that.make.sprite((pos * that.gridsize)-offset, 0, 'bomb', 15));
+            left = bomb.addChild(that.make.sprite((leftPos * -that.gridsize)+offset, 0,'bomb', 15));
+            up = bomb.addChild(that.make.sprite(0, (pos * -that.gridsize) +offset, 'bomb', 15));
+            down = bomb.addChild(that.make.sprite(0, (downPos * that.gridsize) - offset, 'bomb', 15));
+            down.anchor.setTo(0,0);
+            left.anchor.setTo(0, 0);
+            down.scale.y = -1;
+            left.scale.x = -1;
+            right.animations.add('explode_right', [10,18,26,34,42], 15, false);
+            left.animations.add('explode_left', [10,18,26,34,42], 15, false);
+            up.animations.add('explode_up', [8,16,24,32,40], 15, false);
+            down.animations.add('explode_down', [8,16,24,32,40], 15, false);
+            right.animations.play('explode_right', 10, false);
+            left.animations.play('explode_left', 10, false);
+            up.animations.play('explode_up', 10, false);
+            down.animations.play('explode_down', 10, false);
+            bomb.animations.play('explode', 15, false, true);
+          }
 
           that.activeBomb -= 1;
 
